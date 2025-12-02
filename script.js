@@ -719,6 +719,14 @@ class App {
         // New Analysis Cards
         document.getElementById('card-local').addEventListener('click', () => this.selectAnalysisCard('local'));
         document.getElementById('card-cloud').addEventListener('click', () => this.selectAnalysisCard('cloud'));
+
+        // Collapsible Menu Toggle
+        const toggleBtn = document.getElementById('btn-toggle-menu');
+        const panel = document.querySelector('.controls-panel');
+        toggleBtn.addEventListener('click', () => {
+            panel.classList.toggle('collapsed');
+            toggleBtn.textContent = panel.classList.contains('collapsed') ? '[ MENU ]' : '[ HIDE ]';
+        });
     }
 
     selectAnalysisCard(mode) {
@@ -1003,7 +1011,7 @@ class App {
         apiKeyGroup.style.display = mode === 'cloud' ? 'block' : 'none';
     }
 
-    showLoading() {
+    showLoading(centerLatLng) {
         const overlay = document.getElementById('result-overlay');
         const content = overlay.querySelector('.result-content');
         const iconEl = overlay.querySelector('.result-icon');
@@ -1014,6 +1022,38 @@ class App {
         iconEl.innerHTML = '⚙️'; // Gear or Radar icon
         iconEl.className = 'result-icon spin'; // Add spin class
         textEl.textContent = 'ANALYZING PATTERN...';
+
+        // Smart Positioning (Desktop Only)
+        if (centerLatLng && window.innerWidth > 768) {
+            const point = this.map.latLngToContainerPoint(centerLatLng);
+            const overlayWidth = 320; // Approx width
+            const overlayHeight = 200; // Approx height
+
+            // Default: Right of selection
+            let left = point.x + 100; // Offset from center
+            let top = point.y - (overlayHeight / 2);
+
+            // Check if too far right
+            if (left + overlayWidth > window.innerWidth) {
+                // Move to Left
+                left = point.x - overlayWidth - 100;
+            }
+
+            // Check vertical bounds
+            if (top < 80) top = 80; // Below header
+            if (top + overlayHeight > window.innerHeight) top = window.innerHeight - overlayHeight - 20;
+
+            overlay.style.top = `${top}px`;
+            overlay.style.left = `${left}px`;
+            overlay.style.right = 'auto'; // Clear default right
+            overlay.style.bottom = 'auto';
+        } else {
+            // Reset to CSS defaults (Mobile or fallback)
+            overlay.style.top = '';
+            overlay.style.left = '';
+            overlay.style.right = '';
+            overlay.style.bottom = '';
+        }
 
         overlay.style.display = 'flex';
 
@@ -1035,8 +1075,14 @@ class App {
             // But we are inside the class. Let's just call the button click to be safe and simple.
         }
 
-        // Show Loading State Immediately
-        this.showLoading();
+        // Determine Center for Loading Positioning
+        let center = this.map.getCenter();
+        if (this.selectionLayer) {
+            center = this.selectionLayer.getBounds().getCenter();
+        }
+
+        // Show Loading State Immediately (with positioning)
+        this.showLoading(center);
 
         // Clear previous interpretation
         if (this.outlineLayer) {
@@ -1303,7 +1349,8 @@ class App {
             }).addTo(this.map);
         }
 
-        // 3. Add Simplified Marker (Icon Only)
+    // 3. (Removed) Map Marker
+    /*
     const iconHtml = `
         <div class="interpretation-label" style="padding: 5px; border-radius: 50%; width: 50px; height: 50px;">
             <div class="icon" style="font-size: 2rem; margin: 0;">${result.icon}</div>
@@ -1328,6 +1375,7 @@ class App {
         icon: customIcon,
         pane: 'resultPane'
     }).addTo(this.map);
+    */
 
     // 4. Show Result Overlay
     const overlay = document.getElementById('result-overlay');
@@ -1338,6 +1386,7 @@ class App {
 
     iconEl.textContent = result.icon;
     textEl.textContent = `GEMINI SEES A ${result.label}`;
+    iconEl.classList.remove('spin'); // Stop spinning
     overlay.style.display = 'flex';
 
     // Close Handler
@@ -1370,7 +1419,11 @@ class App {
             lineCap: 'round'
         }).addTo(this.map);
 
-        // 2. Add Simplified Marker (Icon Only)
+        // 2. (Removed) Map Marker
+        // User requested to remove the emoji from the map as it covers the rain.
+        // The result is already shown in the overlay.
+
+        /*
         const iconHtml = `
             <div class="interpretation-label" style="padding: 5px; border-radius: 50%; width: 50px; height: 50px;">
                 <div class="icon" style="font-size: 2rem; margin: 0;">${result.icon}</div>
@@ -1395,6 +1448,7 @@ class App {
             icon: customIcon,
             pane: 'resultPane'
         }).addTo(this.map);
+        */
 
         // 3. Show Result Overlay
         const overlay = document.getElementById('result-overlay');
@@ -1411,6 +1465,9 @@ class App {
 
         iconEl.textContent = result.icon;
         textEl.textContent = text;
+        iconEl.classList.remove('spin'); // Stop spinning
+
+        // Ensure display is flex (it should be already from showLoading)
         overlay.style.display = 'flex';
 
         // Close Handler
@@ -1424,9 +1481,7 @@ class App {
         };
         closeBtn.addEventListener('click', closeHandler);
 
-        // Auto-close after 8 seconds (optional, maybe keep it open until user closes?)
-        // Let's keep it open or close on map click?
-        // For now, auto-close is fine but maybe longer.
+        // Auto-close after 10 seconds
         setTimeout(() => {
             if (overlay.style.display !== 'none') closeHandler();
         }, 10000);

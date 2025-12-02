@@ -231,8 +231,9 @@ body, html {
 }
 
 .spin {
-    animation: spin 4s linear infinite;
-    transform-origin: 50px 50px;
+    animation: spin 3s linear infinite;
+    transform-origin: center;
+    display: inline-block;
 }
 
 @keyframes spin {
@@ -613,4 +614,26 @@ body.theme-color .rorschach-canvas {
 @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+}
+
+/* --- Collapsible Menu --- */
+.toggle-menu-btn {
+    background: transparent;
+    border: 1px solid var(--phosphor-secondary);
+    color: var(--phosphor-secondary);
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    padding: 2px 8px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.toggle-menu-btn:hover {
+    background: var(--phosphor-dim);
+    color: var(--phosphor-primary);
+    box-shadow: 0 0 5px var(--phosphor-secondary);
+}
+
+.controls-panel.collapsed {
+    display: none;
 }

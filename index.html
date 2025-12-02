@@ -31,6 +31,7 @@
                     <div class="header-right">
                         <div id="status-indicator" class="status-text">INIT_SYSTEM...</div>
                         <div class="status-light"></div>
+                        <button id="btn-toggle-menu" class="toggle-menu-btn">[ HIDE ]</button>
                     </div>
                 </header>
 
@@ -97,7 +98,8 @@
                         </div>
 
                         <div id="api-key-container" style="display: none; margin-top: 10px;">
-                            <input type="password" id="api-key-input" placeholder="ENTER GEMINI KEY" class="crt-input">
+                            <input type="password" id="api-key-input" name="gemini_api_token_field"
+                                placeholder="ENTER GEMINI KEY" class="crt-input" autocomplete="off" data-1p-ignore>
                         </div>
 
                         <button id="btn-initiate" class="crt-button large-button" disabled>WHAT DO YOU SEE?</button>

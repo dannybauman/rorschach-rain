@@ -17,6 +17,7 @@ The project features a "Cloud Analysis" mode powered by Google's Gemini Vision A
 *   **Real-time Filters**: Scanlines, phosphor glow, and chromatic aberration.
 *   **Interactive Controls**: Adjust the "CRT Intensity" to change the retro vibe.
 *   **Responsive UI**: Analysis results appear in a sleek overlay (Side Panel on Desktop, Bottom Sheet on Mobile).
+*   **Smart UX**: Loading states provide instant feedback, and the result overlay intelligently positions itself near your selection.
 
 ## Development Setup
 
