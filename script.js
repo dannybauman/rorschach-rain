@@ -505,7 +505,10 @@ const RorschachDictionary = {
         { label: "YOLK", icon: "🍳" },
         { label: "DOME", icon: "🏛️" },
         { label: "IGLOO", icon: "🛖" },
-        { label: "JELLYFISH", icon: "🪼" }
+        { label: "JELLYFISH", icon: "🪼" },
+        { label: "BUTTON", icon: "🔘" },
+        { label: "COMPASS", icon: "🧭" },
+        { label: "RING", icon: "💍" }
     ],
     elongated: [
         { label: "SNAKE", icon: "🐍" },
@@ -523,7 +526,10 @@ const RorschachDictionary = {
         { label: "ICICLE", icon: "🧊" },
         { label: "NEEDLE", icon: "🪡" },
         { label: "OBELISK", icon: "🗿" },
-        { label: "STREAM", icon: "💧" }
+        { label: "STREAM", icon: "💧" },
+        { label: "LADDER", icon: "🪜" },
+        { label: "TRAIN", icon: "🚂" },
+        { label: "GUITAR", icon: "🎸" }
     ],
     spiky: [
         { label: "EXPLOSION", icon: "💥" },
@@ -540,7 +546,9 @@ const RorschachDictionary = {
         { label: "SHURIKEN", icon: "💠" },
         { label: "URCHIN", icon: "🦔" },
         { label: "MACE", icon: "🔨" },
-        { label: "CRACK", icon: "🏚️" }
+        { label: "CRACK", icon: "🏚️" },
+        { label: "LIGHTNING", icon: "🌩️" },
+        { label: "CLAW", icon: "🦞" }
     ],
     tiny: [
         { label: "BUG", icon: "🪲" },
@@ -555,7 +563,9 @@ const RorschachDictionary = {
         { label: "PIXEL", icon: "👾" },
         { label: "FLEA", icon: "🦗" },
         { label: "SPARK", icon: "✨" },
-        { label: "DROPLET", icon: "💧" }
+        { label: "DROPLET", icon: "💧" },
+        { label: "MICROBE", icon: "🦠" },
+        { label: "DUST", icon: "💨" }
     ],
     huge: [
         { label: "WHALE", icon: "🐋" },
@@ -570,7 +580,9 @@ const RorschachDictionary = {
         { label: "ASTEROID", icon: "☄️" },
         { label: "CONTINENT", icon: "🗺️" },
         { label: "GLACIER", icon: "❄️" },
-        { label: "MONOLITH", icon: "⬛" }
+        { label: "MONOLITH", icon: "⬛" },
+        { label: "STORM", icon: "⛈️" },
+        { label: "VOLCANO", icon: "🌋" }
     ],
     generic: [
         { label: "RABBIT", icon: "🐰" },
@@ -587,7 +599,10 @@ const RorschachDictionary = {
         { label: "SILHOUETTE", icon: "👥" },
         { label: "PHANTOM", icon: "👻" },
         { label: "MIRAGE", icon: "🏝️" },
-        { label: "ECHO", icon: "🔊" }
+        { label: "ECHO", icon: "🔊" },
+        { label: "VORTEX", icon: "🌀" },
+        { label: "GLITCH", icon: "👾" },
+        { label: "SPIRIT", icon: "🌬️" }
     ]
 };
 
@@ -641,6 +656,9 @@ class ShapeAnalyzer {
         // Adjective Logic (Scaled)
         // Tiny: < 10% of screen diagonal
         // Huge: > 60% of screen diagonal
+        // Adjective Logic (Scaled)
+        // Tiny: < 10% of screen diagonal
+        // Huge: > 60% of screen diagonal
         if (normalizedMagnitude < 0.1) {
             category = 'tiny';
             adjective = ['TINY', 'LITTLE', 'SMALL', 'MICRO'][Math.floor(Math.random()*4)];
@@ -654,8 +672,16 @@ class ShapeAnalyzer {
             category = 'spiky';
             adjective = ['JAGGED', 'TWISTED', 'SHARP', 'SPIKY'][Math.floor(Math.random()*4)];
         } else {
-            category = 'round';
+            // Default to round or generic
+            category = Math.random() > 0.5 ? 'round' : 'generic';
             adjective = ['ROUND', 'SMOOTH', 'SOFT', 'CURVED'][Math.floor(Math.random()*4)];
+        }
+
+        // Chaos Factor: 15% chance to pick a completely random category for variety
+        if (Math.random() < 0.15) {
+            const keys = Object.keys(RorschachDictionary);
+            category = keys[Math.floor(Math.random() * keys.length)];
+            // Keep the adjective as is, or maybe randomize it too? Let's keep it based on shape for some grounding.
         }
 
         // Select random item from category
@@ -1612,22 +1638,18 @@ class App {
         overlay.style.display = 'flex';
 
         // Close Handler
-        const closeHandler = () => {
-            overlay.style.display = 'none';
-            if (this.outlineLayer) this.map.removeLayer(this.outlineLayer);
-            if (this.labelMarker) this.map.removeLayer(this.labelMarker);
-            this.outlineLayer = null;
-            this.labelMarker = null;
-            closeBtn.removeEventListener('click', closeHandler);
-        };
-        closeBtn.addEventListener('click', closeHandler);
+    const closeHandler = () => {
+        overlay.style.display = 'none';
+        if (this.outlineLayer) this.map.removeLayer(this.outlineLayer);
+        if (this.labelMarker) this.map.removeLayer(this.labelMarker);
+        this.outlineLayer = null;
+        this.labelMarker = null;
+        closeBtn.removeEventListener('click', closeHandler);
+    };
+    closeBtn.addEventListener('click', closeHandler);
 
-        // Auto-close after 10 seconds
-        setTimeout(() => {
-            if (overlay.style.display !== 'none') closeHandler();
-        }, 10000);
-    }
-
+    // Auto-close removed to keep result visible until user action
+}
     async loadRadarData() {
         this.updateStatus('CONNECTING...', true);
         try {
