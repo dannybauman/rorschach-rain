@@ -720,7 +720,11 @@ class App {
 
     initMap() {
         this.map = L.map('map', {
-            zoomControl: false,
+            center: [0, 0],
+            zoom: 2,
+            minZoom: 2,
+            maxZoom: 18,
+            zoomControl: false, // Disable default top-left
             attributionControl: false,
             fadeAnimation: false
         }).setView(CONFIG.defaultCenter, CONFIG.defaultZoom);
@@ -730,7 +734,7 @@ class App {
             maxZoom: 19
         }).addTo(this.map);
 
-        L.control.zoom({ position: 'topright' }).addTo(this.map);
+        L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
         // Initialize our single custom layer
         this.rorschachLayer = new L.RorschachLayer();

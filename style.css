@@ -492,10 +492,14 @@ body.theme-color .rorschach-canvas {
     /* Adjust playback bar to not overlap FAB if needed,
        but FAB is absolute so it floats over. */
 }
+/* --- Playback Bar (Desktop & Shared) --- */
 .playback-bar {
-    margin-top: 20px;
+    margin-top: auto; /* Push to bottom of flex container if parent is flex */
     padding-top: 15px;
     border-top: 1px solid var(--phosphor-dim);
+    background: rgba(0, 10, 0, 0.5); /* Slight background for contrast */
+    padding: 15px;
+    margin-bottom: 10px;
 }
 
 .scrubber-container {
