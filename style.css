@@ -458,7 +458,40 @@ body.theme-color .rorschach-canvas {
     }
 }
 
-    /* --- Playback Bar --- */
+/* --- Primary Action Button (Select) --- */
+.primary-action-btn {
+    width: 100%;
+    margin-top: 10px;
+    /* Desktop: Standard button inside sidebar flow */
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    /* ... (previous header styles) ... */
+
+    /* FAB for Select Button */
+    .primary-action-btn {
+        position: absolute;
+        bottom: 110px; /* Above playback bar */
+        right: 20px;
+        width: auto;
+        padding: 15px 25px;
+        border-radius: 30px;
+        background: rgba(0, 20, 0, 0.9);
+        box-shadow: 0 0 15px var(--phosphor-dim);
+        z-index: 1002;
+        font-size: 1.1rem;
+        border: 2px solid var(--phosphor-primary);
+        animation: pulse-glow 2s infinite;
+    }
+
+    .primary-action-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* Adjust playback bar to not overlap FAB if needed,
+       but FAB is absolute so it floats over. */
+}
 .playback-bar {
     margin-top: 20px;
     padding-top: 15px;
