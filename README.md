@@ -9,10 +9,17 @@ The project features a "Cloud Analysis" mode powered by Google's Gemini Vision A
 ## Features
 - **Real-time Radar**: Fetches live precipitation data via RainViewer API.
 - **Ink Blot Mode**: Mirrors and filters radar data to create Rorschach patterns.
-- **Analysis Matrix**:
-    - **Local Scan**: Instant, offline shape analysis using geometric heuristics (sees "Moons", "Dragons", "Whales").
-    - **Cloud Vision**: Deep analysis using Google's Gemini Vision API for detailed interpretations.
-- **Interactive Tools**: Geo-referenced selection tool, panning, and zooming.
+-### 🧠 Analysis Matrix
+*   **Local Scan**: Uses browser-based heuristics (Marching Squares) to detect shapes in the rain data.
+    *   **New**: Now includes "Ruggedness" detection (Jagged vs Smooth).
+    *   **New**: Returns descriptive adjectives (e.g., "GIANT", "TINY", "TWISTED").
+    *   **New**: Smart scaling adapts to your zoom level.
+*   **Cloud Vision**: (Optional) Sends the capture to Google Gemini Pro Vision for a creative AI interpretation.
+
+### 📺 CRT Interface
+*   **Real-time Filters**: Scanlines, phosphor glow, and chromatic aberration.
+*   **Interactive Controls**: Adjust the "CRT Intensity" to change the retro vibe.
+*   **Minimalist UI**: High-contrast, backdrop-blurred interface for maximum immersion.
 
 ## Development Setup
 

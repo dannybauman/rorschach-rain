@@ -120,16 +120,31 @@ L.RorschachLayer = L.Layer.extend({
     onAdd: function(map) {
         this.map = map;
 
+        // Create Custom Panes for Layering
+        // Rorschach Pane: Below overlays (400) but above tiles (200) -> 250
+        if (!map.getPane('rorschachPane')) {
+            map.createPane('rorschachPane');
+            map.getPane('rorschachPane').style.zIndex = 250;
+            map.getPane('rorschachPane').style.pointerEvents = 'none';
+        }
+
+        // Outline Pane: Above Rorschach but below markers (600) -> 450
+        if (!map.getPane('outlinePane')) {
+            map.createPane('outlinePane');
+            map.getPane('outlinePane').style.zIndex = 450;
+            map.getPane('outlinePane').style.pointerEvents = 'none';
+        }
+
         // Rain Canvas
         this.canvas.style.position = 'absolute';
         this.canvas.style.top = '0';
         this.canvas.style.left = '0';
         this.canvas.style.pointerEvents = 'none';
-        this.canvas.style.zIndex = 500; // Above Map Pane (400)
-        this.map.getContainer().appendChild(this.canvas);
+        // Append to custom pane
+        map.getPane('rorschachPane').appendChild(this.canvas);
 
         // Outline Canvas
-        this.map.getContainer().appendChild(this.outlineCanvas);
+        map.getPane('outlinePane').appendChild(this.outlineCanvas);
 
         // Offscreen Buffer for composition
         this.buffer = document.createElement('canvas');
@@ -327,8 +342,8 @@ L.RorschachLayer = L.Layer.extend({
         const width = this.buffer.width;
         const height = this.buffer.height;
 
-        // Higher resolution for better accuracy (0.5 instead of 0.1)
-        const scale = 0.5;
+        // Higher resolution for better accuracy (0.75 instead of 0.5)
+        const scale = 0.75;
         const smWidth = Math.floor(width * scale);
         const smHeight = Math.floor(height * scale);
 
@@ -338,7 +353,9 @@ L.RorschachLayer = L.Layer.extend({
         const smCtx = smCanvas.getContext('2d');
 
         // Draw the buffer with the blur filter applied
-        smCtx.filter = 'blur(2px) contrast(200%)';
+        // Increased blur and contrast to merge blobs and catch faint edges
+        // Increased blur from 4px to 8px for much looser, organic shapes
+        smCtx.filter = 'blur(8px) contrast(400%)';
         smCtx.drawImage(this.buffer, 0, 0, smWidth, smHeight);
 
         // --- SMART CLIPPING ---
@@ -364,7 +381,8 @@ L.RorschachLayer = L.Layer.extend({
         const data = imgData.data;
 
         // Marching Squares Implementation
-        const threshold = 128;
+        // Lower threshold (60/255 approx 23%) to catch even fainter "ink"
+        const threshold = 60;
         const segments = []; // Store line segments [x1, y1, x2, y2]
         let minX = smWidth, minY = smHeight, maxX = 0, maxY = 0;
         let hasShape = false;
@@ -473,7 +491,9 @@ const RorschachDictionary = {
         { label: "PLANET", icon: "🪐" },
         { label: "EGG", icon: "🥚" },
         { label: "TURTLE", icon: "🐢" },
-        { label: "BEETLE", icon: "🪲" }
+        { label: "BEETLE", icon: "🪲" },
+        { label: "BALLOON", icon: "🎈" },
+        { label: "PEARL", icon: "🦪" }
     ],
     elongated: [
         { label: "SNAKE", icon: "🐍" },
@@ -483,7 +503,9 @@ const RorschachDictionary = {
         { label: "LIGHTNING", icon: "⚡" },
         { label: "DNA", icon: "🧬" },
         { label: "GIRAFFE", icon: "🦒" },
-        { label: "VINE", icon: "🌿" }
+        { label: "VINE", icon: "🌿" },
+        { label: "COMET", icon: "☄️" },
+        { label: "TOWER", icon: "🗼" }
     ],
     spiky: [
         { label: "EXPLOSION", icon: "💥" },
@@ -493,7 +515,9 @@ const RorschachDictionary = {
         { label: "DRAGON", icon: "🐉" },
         { label: "CROWN", icon: "👑" },
         { label: "CACTUS", icon: "🌵" },
-        { label: "STAR", icon: "⭐" }
+        { label: "STAR", icon: "⭐" },
+        { label: "DEMON", icon: "👿" },
+        { label: "SHARD", icon: "💎" }
     ],
     tiny: [
         { label: "BUG", icon: "🪲" },
@@ -501,7 +525,8 @@ const RorschachDictionary = {
         { label: "PEBBLE", icon: "🪨" },
         { label: "SEED", icon: "🌱" },
         { label: "ANT", icon: "🐜" },
-        { label: "BERRY", icon: "🫐" }
+        { label: "BERRY", icon: "🫐" },
+        { label: "ATOM", icon: "⚛️" }
     ],
     huge: [
         { label: "WHALE", icon: "🐋" },
@@ -509,7 +534,8 @@ const RorschachDictionary = {
         { label: "TITAN", icon: "🗿" },
         { label: "FOREST", icon: "🌳" },
         { label: "CITY", icon: "🏙️" },
-        { label: "ELEPHANT", icon: "🐘" }
+        { label: "ELEPHANT", icon: "🐘" },
+        { label: "GALAXY", icon: "🌌" }
     ],
     generic: [
         { label: "RABBIT", icon: "🐰" },
@@ -517,60 +543,77 @@ const RorschachDictionary = {
         { label: "GHOST", icon: "👻" },
         { label: "SKULL", icon: "💀" },
         { label: "BIRD", icon: "🐦" },
-        { label: "FISH", icon: "🐟" }
+        { label: "FISH", icon: "🐟" },
+        { label: "BAT", icon: "🦇" },
+        { label: "MASK", icon: "🎭" }
     ]
 };
 
 class ShapeAnalyzer {
-    static analyze(blob, width, height) {
+    static analyze(blob, viewBounds) {
         if (!blob || !blob.segments || blob.segments.length === 0) return null;
 
         // 1. Calculate Metrics
-        // We need to approximate Area and Perimeter from segments or bounds
-        // Since we don't have the raw pixel mask easily accessible here (it's in getOutlines but not returned),
-        // we will use the Bounding Box of the segments as a proxy for now.
-        // Ideally, getOutlines should return these metrics.
-
-        // Let's calculate bounds of the segments
         let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+        let perimeter = 0;
 
         blob.segments.forEach(seg => {
             // seg is [LatLng, LatLng]
-            seg.forEach(pt => {
-                minLat = Math.min(minLat, pt.lat);
-                maxLat = Math.max(maxLat, pt.lat);
-                minLng = Math.min(minLng, pt.lng);
-                maxLng = Math.max(maxLng, pt.lng);
-            });
+            const p1 = seg[0];
+            const p2 = seg[1];
+
+            minLat = Math.min(minLat, p1.lat, p2.lat);
+            maxLat = Math.max(maxLat, p1.lat, p2.lat);
+            minLng = Math.min(minLng, p1.lng, p2.lng);
+            maxLng = Math.max(maxLng, p1.lng, p2.lng);
+
+            // Rough Euclidean distance for perimeter (ignoring projection distortion for simplicity)
+            const dLat = p2.lat - p1.lat;
+            const dLng = p2.lng - p1.lng;
+            perimeter += Math.sqrt(dLat*dLat + dLng*dLng);
         });
 
         const latSpan = maxLat - minLat;
         const lngSpan = maxLng - minLng;
+        const boxPerimeter = 2 * (latSpan + lngSpan);
 
-        // Rough Aspect Ratio (Elongation)
+        // Metrics
         const aspectRatio = Math.max(latSpan, lngSpan) / Math.min(latSpan, lngSpan);
-
-        // Rough Size (Area proxy relative to map view? Hard to say without context)
-        // Let's use the span magnitude.
         const magnitude = Math.sqrt(latSpan*latSpan + lngSpan*lngSpan);
 
-        // Complexity/Spikiness is hard without pixel data or vertex count/area ratio.
-        // Proxy: Segment count vs Bounding Box size.
-        // A simple shape has few segments relative to size? No, marching squares always has many short segments.
-        // Let's use Aspect Ratio and Size for now.
+        // Ruggedness: Ratio of actual path length to bounding box perimeter
+        const ruggedness = perimeter / boxPerimeter;
+
+        // Normalize Magnitude against View Bounds
+        let normalizedMagnitude = 0.5; // Default if no bounds
+        if (viewBounds) {
+            const viewLatSpan = viewBounds.getNorth() - viewBounds.getSouth();
+            const viewLngSpan = viewBounds.getEast() - viewBounds.getWest();
+            const viewDiagonal = Math.sqrt(viewLatSpan*viewLatSpan + viewLngSpan*viewLngSpan);
+            normalizedMagnitude = magnitude / viewDiagonal;
+        }
 
         let category = 'generic';
+        let adjective = '';
 
-        if (magnitude < 0.05) {
+        // Adjective Logic (Scaled)
+        // Tiny: < 10% of screen diagonal
+        // Huge: > 60% of screen diagonal
+        if (normalizedMagnitude < 0.1) {
             category = 'tiny';
-        } else if (magnitude > 5.0) {
+            adjective = ['TINY', 'LITTLE', 'SMALL', 'MICRO'][Math.floor(Math.random()*4)];
+        } else if (normalizedMagnitude > 0.6) {
             category = 'huge';
+            adjective = ['GIANT', 'MASSIVE', 'COLOSSAL', 'MEGA'][Math.floor(Math.random()*4)];
         } else if (aspectRatio > 2.5) {
             category = 'elongated';
+            adjective = ['LONG', 'STRETCHED', 'TALL', 'THIN'][Math.floor(Math.random()*4)];
+        } else if (ruggedness > 1.5) {
+            category = 'spiky';
+            adjective = ['JAGGED', 'TWISTED', 'SHARP', 'SPIKY'][Math.floor(Math.random()*4)];
         } else {
-            // Randomly decide between Round and Spiky for now since we lack Compactness
-            // In a real implementation, we'd calculate (4*PI*Area)/(Perimeter^2)
-            category = Math.random() > 0.5 ? 'round' : 'spiky';
+            category = 'round';
+            adjective = ['ROUND', 'SMOOTH', 'SOFT', 'CURVED'][Math.floor(Math.random()*4)];
         }
 
         // Select random item from category
@@ -579,7 +622,8 @@ class ShapeAnalyzer {
 
         return {
             ...result,
-            metrics: { magnitude, aspectRatio, category }
+            adjective: adjective,
+            metrics: { magnitude, normalizedMagnitude, aspectRatio, ruggedness, category }
         };
     }
 }
@@ -636,7 +680,19 @@ class App {
 
         document.getElementById('color-scheme').addEventListener('change', (e) => this.setTheme(e.target.value));
         document.getElementById('crt-intensity').addEventListener('input', (e) => {
-            document.querySelector('.scanlines').style.opacity = e.target.value / 100 * 0.3;
+            const val = parseInt(e.target.value);
+            const root = document.documentElement;
+
+            // Map 0-100 to various effect ranges
+            const scanlineOpacity = 0.05 + (val / 100) * 0.4; // 0.05 to 0.45
+            const glowStrength = (val / 100) * 50; // 0 to 50px
+            const textGlow = (val / 100) * 10; // 0 to 10px
+            const brightness = 0.8 + (val / 100) * 0.4; // 0.8 to 1.2
+
+            root.style.setProperty('--scanline-opacity', scanlineOpacity);
+            root.style.setProperty('--screen-glow', `0 0 ${glowStrength}px`);
+            root.style.setProperty('--text-glow', `0 0 ${textGlow}px`);
+            root.style.setProperty('--brightness', brightness);
         });
 
         const scrubber = document.getElementById('time-scrubber');
@@ -1005,7 +1061,9 @@ class App {
         // 2. Mock AI Delay
         setTimeout(() => {
             // 3. Analyze Shape using Heuristics
-            let result = ShapeAnalyzer.analyze(blob, this.rorschachLayer.canvas.width, this.rorschachLayer.canvas.height);
+            // Pass current map bounds for normalization
+            const viewBounds = this.map.getBounds();
+            let result = ShapeAnalyzer.analyze(blob, viewBounds);
 
             if (!result) {
                 // Fallback if analysis fails
@@ -1252,21 +1310,38 @@ class App {
         }).addTo(this.map);
 
         // 2. Add Label Marker
+        // Construct label text with adjective if available
+        const article = (result.adjective && /^[AEIOU]/.test(result.adjective)) ? 'AN' : 'A';
+        const text = result.adjective
+            ? `I SEE ${article} ${result.adjective} ${result.label}`
+            : `I SEE A ${result.label}`;
+
         const iconHtml = `
             <div class="interpretation-label">
                 <div class="icon">${result.icon}</div>
-                <div class="label">I SEE A ${result.label}</div>
+                <div class="label">${text}</div>
             </div>
         `;
 
         const customIcon = L.divIcon({
             html: iconHtml,
             className: 'custom-div-icon',
-            iconSize: [100, 100],
-            iconAnchor: [50, 50] // Center it
+            iconSize: [200, 100], // Increased width for longer text
+            iconAnchor: [100, 50] // Center it
         });
 
-        this.labelMarker = L.marker(blob.center, { icon: customIcon }).addTo(this.map);
+        // Create Result Pane if needed (Topmost)
+        if (!this.map.getPane('resultPane')) {
+            this.map.createPane('resultPane');
+            this.map.getPane('resultPane').style.zIndex = 2000;
+            this.map.getPane('resultPane').style.pointerEvents = 'none';
+        }
+
+        // Add to resultPane
+        this.labelMarker = L.marker(blob.center, {
+            icon: customIcon,
+            pane: 'resultPane'
+        }).addTo(this.map);
 
         // Remove after a few seconds
         setTimeout(() => {
