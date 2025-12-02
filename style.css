@@ -515,3 +515,102 @@ body.theme-color .rorschach-canvas {
     50% { box-shadow: 0 0 15px var(--phosphor-secondary); }
     100% { box-shadow: 0 0 5px var(--phosphor-dim); }
 }
+
+/* --- Result Overlay (Responsive) --- */
+.result-overlay {
+    position: absolute;
+    z-index: 2000; /* Topmost UI */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto; /* Allow interaction */
+}
+
+/* Desktop: Top-Right Floating Card */
+@media (min-width: 769px) {
+    .result-overlay {
+        top: 80px; /* Below header */
+        right: 20px;
+        width: 320px;
+    }
+
+    .result-content {
+        background: rgba(10, 20, 10, 0.85); /* Dark Glass */
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--phosphor-primary);
+        box-shadow: 0 0 15px var(--phosphor-dim);
+        padding: 20px;
+        border-radius: 4px;
+        color: var(--phosphor-primary);
+        font-family: 'VT323', monospace;
+        text-align: center;
+        position: relative;
+        animation: slideInRight 0.3s ease-out;
+    }
+}
+
+/* Mobile: Bottom Sheet */
+@media (max-width: 768px) {
+    .result-overlay {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto; /* Override desktop top */
+        width: 100%;
+    }
+
+    .result-content {
+        background: rgba(10, 20, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 2px solid var(--phosphor-primary);
+        box-shadow: 0 -5px 20px var(--phosphor-dim);
+        padding: 25px 20px 40px 20px; /* Extra bottom padding for safe area */
+        border-radius: 15px 15px 0 0;
+        color: var(--phosphor-primary);
+        font-family: 'VT323', monospace;
+        text-align: center;
+        width: 100%;
+        position: relative;
+        animation: slideUp 0.3s ease-out;
+    }
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px var(--phosphor-primary);
+}
+
+.result-text {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px var(--phosphor-primary);
+}
+
+.close-result {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--phosphor-dim);
+    font-size: 2rem;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+}
+
+.close-result:hover {
+    color: var(--phosphor-primary);
+    text-shadow: 0 0 5px var(--phosphor-primary);
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}

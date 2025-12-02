@@ -1274,40 +1274,66 @@ class App {
             }).addTo(this.map);
         }
 
-        // 3. Add Label
-        const iconHtml = `
-            <div class="interpretation-label">
-                <div class="icon">${result.icon}</div>
-                <div class="label">GEMINI SEES A ${result.label}</div>
-            </div>
-        `;
+        // 3. Add Simplified Marker (Icon Only)
+    const iconHtml = `
+        <div class="interpretation-label" style="padding: 5px; border-radius: 50%; width: 50px; height: 50px;">
+            <div class="icon" style="font-size: 2rem; margin: 0;">${result.icon}</div>
+        </div>
+    `;
 
-        const customIcon = L.divIcon({
-            html: iconHtml,
-            className: 'custom-div-icon',
-            iconSize: [200, 100],
-            iconAnchor: [100, 50]
-        });
+    const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-div-icon',
+        iconSize: [50, 50],
+        iconAnchor: [25, 25]
+    });
 
-        this.labelMarker = L.marker(center, { icon: customIcon }).addTo(this.map);
-
-        // Remove after a while
-        setTimeout(() => {
-            if (this.sketchLayer) this.map.removeLayer(this.sketchLayer);
-            if (this.labelMarker) this.map.removeLayer(this.labelMarker);
-
-            // Clear outlines
-            this.rorschachLayer.setOutlines(null);
-
-            this.sketchLayer = null;
-            this.labelMarker = null;
-            this.outlineLayer = null;
-        }, 10000);
+    // Create Result Pane if needed (Topmost)
+    if (!this.map.getPane('resultPane')) {
+        this.map.createPane('resultPane');
+        this.map.getPane('resultPane').style.zIndex = 2000;
+        this.map.getPane('resultPane').style.pointerEvents = 'none';
     }
 
+    this.labelMarker = L.marker(center, {
+        icon: customIcon,
+        pane: 'resultPane'
+    }).addTo(this.map);
+
+    // 4. Show Result Overlay
+    const overlay = document.getElementById('result-overlay');
+    const content = overlay.querySelector('.result-content');
+    const iconEl = overlay.querySelector('.result-icon');
+    const textEl = overlay.querySelector('.result-text');
+    const closeBtn = overlay.querySelector('.close-result');
+
+    iconEl.textContent = result.icon;
+    textEl.textContent = `GEMINI SEES A ${result.label}`;
+    overlay.style.display = 'flex';
+
+    // Close Handler
+    const closeHandler = () => {
+        overlay.style.display = 'none';
+        if (this.sketchLayer) this.map.removeLayer(this.sketchLayer);
+        if (this.labelMarker) this.map.removeLayer(this.labelMarker);
+
+        // Clear outlines
+        this.rorschachLayer.setOutlines(null);
+
+        this.sketchLayer = null;
+        this.labelMarker = null;
+        this.outlineLayer = null;
+        closeBtn.removeEventListener('click', closeHandler);
+    };
+    closeBtn.addEventListener('click', closeHandler);
+
+    // Remove after a while
+    setTimeout(() => {
+        if (overlay.style.display !== 'none') closeHandler();
+    }, 15000); // Longer timeout for Cloud Vision
+}
     showInterpretation(blob, result) {
         // 1. Draw Red Outline (Polyline)
-        // blob.segments is an array of [ [lat,lng], [lat,lng] ] lines
         this.outlineLayer = L.polyline(blob.segments, {
             color: 'red',
             weight: 3,
@@ -1315,25 +1341,18 @@ class App {
             lineCap: 'round'
         }).addTo(this.map);
 
-        // 2. Add Label Marker
-        // Construct label text with adjective if available
-        const article = (result.adjective && /^[AEIOU]/.test(result.adjective)) ? 'AN' : 'A';
-        const text = result.adjective
-            ? `I SEE ${article} ${result.adjective} ${result.label}`
-            : `I SEE A ${result.label}`;
-
+        // 2. Add Simplified Marker (Icon Only)
         const iconHtml = `
-            <div class="interpretation-label">
-                <div class="icon">${result.icon}</div>
-                <div class="label">${text}</div>
+            <div class="interpretation-label" style="padding: 5px; border-radius: 50%; width: 50px; height: 50px;">
+                <div class="icon" style="font-size: 2rem; margin: 0;">${result.icon}</div>
             </div>
         `;
 
         const customIcon = L.divIcon({
             html: iconHtml,
             className: 'custom-div-icon',
-            iconSize: [200, 100], // Increased width for longer text
-            iconAnchor: [100, 50] // Center it
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
         });
 
         // Create Result Pane if needed (Topmost)
@@ -1343,19 +1362,45 @@ class App {
             this.map.getPane('resultPane').style.pointerEvents = 'none';
         }
 
-        // Add to resultPane
         this.labelMarker = L.marker(blob.center, {
             icon: customIcon,
             pane: 'resultPane'
         }).addTo(this.map);
 
-        // Remove after a few seconds
-        setTimeout(() => {
+        // 3. Show Result Overlay
+        const overlay = document.getElementById('result-overlay');
+        const content = overlay.querySelector('.result-content');
+        const iconEl = overlay.querySelector('.result-icon');
+        const textEl = overlay.querySelector('.result-text');
+        const closeBtn = overlay.querySelector('.close-result');
+
+        // Construct text
+        const article = (result.adjective && /^[AEIOU]/.test(result.adjective)) ? 'AN' : 'A';
+        const text = result.adjective
+            ? `I SEE ${article} ${result.adjective} ${result.label}`
+            : `I SEE A ${result.label}`;
+
+        iconEl.textContent = result.icon;
+        textEl.textContent = text;
+        overlay.style.display = 'flex';
+
+        // Close Handler
+        const closeHandler = () => {
+            overlay.style.display = 'none';
             if (this.outlineLayer) this.map.removeLayer(this.outlineLayer);
             if (this.labelMarker) this.map.removeLayer(this.labelMarker);
             this.outlineLayer = null;
             this.labelMarker = null;
-        }, 8000);
+            closeBtn.removeEventListener('click', closeHandler);
+        };
+        closeBtn.addEventListener('click', closeHandler);
+
+        // Auto-close after 8 seconds (optional, maybe keep it open until user closes?)
+        // Let's keep it open or close on map click?
+        // For now, auto-close is fine but maybe longer.
+        setTimeout(() => {
+            if (overlay.style.display !== 'none') closeHandler();
+        }, 10000);
     }
 
     async loadRadarData() {
