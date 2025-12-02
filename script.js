@@ -785,6 +785,13 @@ class App {
         // Collapsible Menu Toggle
         const toggleBtn = document.getElementById('btn-toggle-menu');
         const panel = document.querySelector('.controls-panel');
+
+        // Initial State for Mobile: Collapsed
+        if (window.innerWidth <= 768) {
+            panel.classList.add('collapsed');
+            toggleBtn.textContent = '[ MENU ]';
+        }
+
         toggleBtn.addEventListener('click', () => {
             panel.classList.toggle('collapsed');
             toggleBtn.textContent = panel.classList.contains('collapsed') ? '[ MENU ]' : '[ HIDE ]';

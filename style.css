@@ -458,6 +458,135 @@ body.theme-color .rorschach-canvas {
     }
 }
 
+    /* --- Playback Bar --- */
+.playback-bar {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--phosphor-dim);
+}
+
+.scrubber-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+#btn-play {
+    background: none;
+    border: 1px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    font-family: 'VT323', monospace;
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#btn-play:hover {
+    background: var(--phosphor-dim);
+    color: #000;
+}
+
+#time-scrubber {
+    flex-grow: 1;
+    accent-color: var(--phosphor-primary);
+    cursor: pointer;
+}
+
+#timestamp-display {
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--phosphor-dim);
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    .terminal-header {
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .terminal-header h1 {
+        font-size: 1.2rem;
+        margin-bottom: 0;
+    }
+
+    .header-right {
+        gap: 10px;
+    }
+
+    .status-text {
+        display: none; /* Save space */
+    }
+
+    /* Collapsible Menu */
+    .controls-panel {
+        position: absolute;
+        top: 60px; /* Below header */
+        right: 0;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        max-height: calc(100dvh - 140px); /* Leave space for playback bar */
+        overflow-y: auto;
+        border-left: none;
+        border-bottom: 2px solid var(--phosphor-primary);
+        background: rgba(10, 20, 10, 0.95);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        z-index: 1001;
+    }
+
+    .controls-panel.collapsed {
+        transform: translateY(-20px);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Floating Playback Bar */
+    .playback-bar {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        border: 1px solid var(--phosphor-primary);
+        border-radius: 4px;
+        padding: 10px;
+        margin: 0;
+        z-index: 1002; /* Above map, below overlay */
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
+
+    .result-overlay {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto; /* Override desktop top */
+        width: 100%;
+        z-index: 2000; /* Topmost */
+    }
+
+    .result-content {
+        background: rgba(10, 20, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 2px solid var(--phosphor-primary);
+        box-shadow: 0 -5px 20px var(--phosphor-dim);
+        padding: 25px 20px 40px 20px; /* Extra bottom padding for safe area */
+        border-radius: 15px 15px 0 0;
+        color: var(--phosphor-primary);
+        font-family: 'VT323', monospace;
+        text-align: center;
+        width: 100%;
+        position: relative;
+        animation: slideUp 0.3s ease-out;
+    }
+}
 .blink {
     animation: blink-text 1s infinite;
 }

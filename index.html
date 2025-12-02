@@ -111,26 +111,29 @@
                     <!-- Old Identify Button (Removed/Replaced by above) -->
                     <!-- <button id="btn-identify" class="crt-button">WHAT DO YOU SEE?</button> -->
 
-                    <div class="control-group">
-                        <label>TIME_SCRUBBER</label>
-                        <div class="scrubber-container">
-                            <button id="btn-play">▶</button>
-                            <input type="range" id="time-scrubber" min="0" max="10" value="10" disabled>
-                        </div>
-                        <div id="timestamp-display">CONNECTING...</div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Result Overlay (Responsive) -->
-            <div id="result-overlay" class="result-overlay" style="display: none;">
-                <div class="result-content">
-                    <div class="result-icon"></div>
-                    <div class="result-text"></div>
-                    <button class="close-result">×</button>
+            <!-- New Floating Playback Bar -->
+            <div class="playback-bar">
+                <div class="scrubber-container">
+                    <button id="btn-play">▶</button>
+                    <input type="range" id="time-scrubber" min="0" max="10" value="10" disabled>
                 </div>
+                <div id="timestamp-display">CONNECTING...</div>
             </div>
         </div>
+    </div>
+
+    <!-- Result Overlay (Responsive) -->
+    <div id="result-overlay" class="result-overlay" style="display: none;">
+        <div class="result-content">
+            <div class="result-icon"></div>
+            <div class="result-text"></div>
+            <button class="close-result">×</button>
+        </div>
+    </div>
+    </div>
     </div>
 
     <!-- Lock Selection Button (Mobile) -->
