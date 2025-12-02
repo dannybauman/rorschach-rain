@@ -1,0 +1,403 @@
+:root {
+    --phosphor-primary: #00ff41;
+    --phosphor-secondary: #008f11;
+    --phosphor-dim: #003b00;
+    --screen-bg: #0d1117;
+    --crt-curvature: 2px;
+    --scanline-opacity: 0.15;
+    --glow-strength: 0px 0px 10px;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    font-family: 'VT323', monospace;
+    overflow: hidden;
+    color: var(--phosphor-primary);
+}
+
+/* CRT Container & Screen */
+.crt-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.screen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: var(--screen-bg);
+    border: 2px solid var(--phosphor-dim);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    animation: turnOn 4s linear;
+}
+
+@keyframes turnOn {
+    0% {
+        transform: scale(1, 0.002);
+        filter: brightness(30);
+        opacity: 0;
+    }
+    10% {
+        transform: scale(1, 0.002);
+        filter: brightness(30);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1, 0.002);
+        filter: brightness(30);
+        opacity: 1;
+    }
+    60% {
+        transform: scale(1, 1);
+        filter: brightness(10);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1, 1);
+        filter: brightness(1);
+        opacity: 1;
+    }
+}
+
+/* CRT Effects */
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: var(--scanline-opacity);
+}
+
+.glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0,255,65,0.05) 0%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+    z-index: 999;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.7);
+}
+
+/* Map */
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    /* Filter moved to inner layers to allow red outlines to pop */
+}
+
+.leaflet-tile-pane, .rorschach-canvas {
+    filter: sepia(100%) hue-rotate(50deg) saturate(300%) contrast(1.2); /* Default Green Tint */
+    transition: filter 0.5s ease;
+}
+
+/* UI Overlay */
+.ui-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    pointer-events: none; /* Let clicks pass through to map where not on controls */
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 10, 0, 0.8);
+    border: 1px solid var(--phosphor-secondary);
+    pointer-events: auto;
+    text-shadow: var(--glow-strength) var(--phosphor-primary);
+}
+
+.terminal-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-text {
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    color: var(--phosphor-primary);
+    text-shadow: 0 0 5px var(--phosphor-primary);
+}
+
+.status-light {
+    width: 12px;
+    height: 12px;
+    background-color: var(--phosphor-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--phosphor-primary);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Interpretation Label (Leaflet Marker) */
+.custom-div-icon {
+    background: transparent;
+    border: none;
+}
+
+.interpretation-label {
+    text-align: center;
+    color: var(--phosphor-primary);
+    text-shadow: 0 0 5px var(--phosphor-primary);
+    animation: popIn 0.5s ease-out;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.interpretation-label .icon {
+    font-size: 3rem;
+    margin-bottom: 5px;
+}
+
+.interpretation-label .label {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2px 8px;
+    border: 1px solid var(--phosphor-primary);
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.sketch-overlay {
+    mix-blend-mode: screen; /* Makes black background transparent */
+    pointer-events: none;
+}
+
+.spin {
+    animation: spin 4s linear infinite;
+    transform-origin: 50px 50px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.draw-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw 2s forwards;
+}
+
+@keyframes draw {
+    to { stroke-dashoffset: 0; }
+}
+.crt-input {
+    background: rgba(0, 20, 0, 0.8);
+    border: 1px solid var(--phosphor-secondary);
+    color: var(--phosphor-primary);
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    padding: 5px;
+    width: 100%;
+    margin-top: 5px;
+    outline: none;
+    box-shadow: 0 0 5px var(--phosphor-secondary);
+}
+
+.crt-input:focus {
+    border-color: var(--phosphor-primary);
+    box-shadow: 0 0 10px var(--phosphor-primary);
+}
+.selection-box {
+    /* Deprecated but kept for safety */
+    position: absolute;
+    border: 2px dashed var(--phosphor-primary);
+    background: rgba(0, 255, 0, 0.1);
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.resize-handle {
+    background: var(--phosphor-primary);
+    border: 1px solid #000;
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 5px var(--phosphor-primary);
+}
+
+.controls-panel {
+    background: rgba(0, 10, 0, 0.9);
+    border: 1px solid var(--phosphor-secondary);
+    padding: 15px;
+    width: 300px;
+    pointer-events: auto;
+    margin-top: auto; /* Push to bottom if needed, or just float */
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+    text-shadow: 0 0 5px var(--phosphor-secondary);
+}
+
+.toggle-group {
+    display: flex;
+    gap: 5px;
+}
+
+button {
+    background: transparent;
+    border: 1px solid var(--phosphor-secondary);
+    color: var(--phosphor-secondary);
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+button:hover {
+    background: var(--phosphor-dim);
+    color: var(--phosphor-primary);
+    box-shadow: 0 0 10px var(--phosphor-secondary);
+}
+
+button.active {
+    background: var(--phosphor-secondary);
+    color: #000;
+    box-shadow: 0 0 15px var(--phosphor-primary);
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--phosphor-primary);
+    background: transparent;
+}
+
+select {
+    width: 100%;
+    background: #000;
+    color: var(--phosphor-primary);
+    border: 1px solid var(--phosphor-secondary);
+    font-family: 'VT323', monospace;
+    padding: 5px;
+}
+
+.scrubber-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#timestamp-display {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: right;
+    opacity: 0.8;
+}
+
+/* Themes */
+body.theme-amber {
+    --phosphor-primary: #ffb000;
+    --phosphor-secondary: #cc8800;
+    --phosphor-dim: #442200;
+}
+
+body.theme-amber .leaflet-tile-pane,
+body.theme-amber .rorschach-canvas {
+    filter: sepia(100%) hue-rotate(-30deg) saturate(300%) contrast(1.2);
+}
+
+body.theme-color {
+    --phosphor-primary: #ffffff;
+    --phosphor-secondary: #aaaaaa;
+    --phosphor-dim: #333333;
+}
+
+body.theme-color .leaflet-tile-pane,
+body.theme-color .rorschach-canvas {
+    filter: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .controls-panel {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    .crt-container {
+        padding: 0;
+    }
+    .screen {
+        border-radius: 0;
+        border: none;
+    }
+    .ui-overlay {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.blink {
+    animation: blink-text 1s infinite;
+}
+
+@keyframes blink-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

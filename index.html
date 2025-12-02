@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rorschach Rain: Retro CRT Storm Patterns</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Google Fonts: VT323 for that retro terminal look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="crt-container">
+        <div class="screen">
+            <div class="scanlines"></div>
+            <div class="glow"></div>
+            <div id="map"></div>
+
+            <div class="ui-overlay">
+                <header class="terminal-header">
+                    <h1>RORSCHACH_RAIN_v1.0</h1>
+                    <div class="header-right">
+                        <div id="status-indicator" class="status-text">INIT_SYSTEM...</div>
+                        <div class="status-light"></div>
+                    </div>
+                </header>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>VIEW_MODE</label>
+                        <div class="toggle-group">
+                            <button id="btn-radar" class="active">RADAR</button>
+                            <button id="btn-inkblot">INK_BLOT</button>
+                            <button id="btn-both">BOTH</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>CRT_INTENSITY</label>
+                        <input type="range" id="crt-intensity" min="0" max="100" value="80">
+                    </div>
+
+                    <div class="control-group">
+                        <label>COLOR_SCHEME</label>
+                        <select id="color-scheme">
+                            <option value="green">PHOSPHOR_GREEN</option>
+                            <option value="amber">AMBER_TERMINAL</option>
+                            <option value="color">FULL_COLOR</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>ANALYSIS MODE</label>
+                        <div class="toggle-group">
+                            <button id="btn-mode-local" class="active">LOCAL</button>
+                            <button id="btn-mode-cloud">CLOUD</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="api-key-group" style="display:none;">
+                        <label>GEMINI API KEY</label>
+                        <input type="password" id="api-key-input" placeholder="PASTE KEY HERE" class="crt-input">
+                    </div>
+
+                    <div class="control-group">
+                        <button id="btn-select" class="crt-button">SELECT AREA</button>
+                        <button id="btn-identify" class="crt-button">WHAT DO YOU SEE?</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>TIME_SCRUBBER</label>
+                        <div class="scrubber-container">
+                            <button id="btn-play">▶</button>
+                            <input type="range" id="time-scrubber" min="0" max="10" value="10" disabled>
+                        </div>
+                        <div id="timestamp-display">CONNECTING...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
