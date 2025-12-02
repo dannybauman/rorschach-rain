@@ -764,6 +764,12 @@ class App {
         this.map.on('mousedown', (e) => this.onMapMouseDown(e));
         this.map.on('mousemove', (e) => this.onMapMouseMove(e));
         this.map.on('mouseup', (e) => this.onMapMouseUp(e));
+
+        // Touch Support (Native DOM Events)
+        const mapContainer = this.map.getContainer();
+        mapContainer.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+        mapContainer.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        mapContainer.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
     }
 
     toggleSelectionMode() {
@@ -782,6 +788,14 @@ class App {
 
             this.map.dragging.disable();
             container.style.cursor = 'crosshair';
+
+            // Auto-Hide Menu: Force collapse
+            const panel = document.querySelector('.controls-panel');
+            const toggleBtn = document.getElementById('btn-toggle-menu');
+            if (panel) {
+                panel.classList.add('collapsed');
+                if (toggleBtn) toggleBtn.textContent = '[ MENU ]';
+            }
 
             // If we already have a selection, keep it, but enable editing interactions
             if (this.selectionLayer) {
@@ -802,6 +816,39 @@ class App {
             container.style.cursor = 'default';
             this.hideResizeHandles();
         }
+    }
+
+    // Touch Event Handlers
+    onTouchStart(e) {
+        if (!this.isSelectionMode || e.touches.length !== 1) return;
+        e.preventDefault(); // Stop map panning/zooming
+
+        const touch = e.touches[0];
+        const containerPoint = this.map.mouseEventToContainerPoint(touch);
+        const latlng = this.map.containerPointToLatLng(containerPoint);
+
+        // Mock Leaflet Event
+        this.onMapMouseDown({ latlng: latlng, originalEvent: e });
+    }
+
+    onTouchMove(e) {
+        if (!this.isSelectionMode || e.touches.length !== 1) return;
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        const containerPoint = this.map.mouseEventToContainerPoint(touch);
+        const latlng = this.map.containerPointToLatLng(containerPoint);
+
+        this.onMapMouseMove({ latlng: latlng, originalEvent: e });
+    }
+
+    onTouchEnd(e) {
+        if (!this.isSelectionMode) return;
+        // e.preventDefault(); // Optional, might block click emulation
+
+        // We don't have coordinates in touchend, but onMapMouseUp doesn't strictly need them
+        // unless it's using them for logic. It uses this.selectionLayer.getBounds().
+        this.onMapMouseUp({ originalEvent: e });
     }
 
     onMapMouseDown(e) {
