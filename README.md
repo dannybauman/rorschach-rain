@@ -1,5 +1,7 @@
 # Rorschach Rain
 
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://dannybauman.github.io/rorschach-rain/)
+
 **Rorschach Rain** is an interactive weather visualization experiment that transforms real-time radar data into Rorschach inkblot tests. By mirroring and filtering storm cells, it creates organic, symmetrical patterns that invite interpretation.
 
 The project features a "Cloud Analysis" mode powered by Google's Gemini Vision API, which identifies shapes in the rain and offers creative interpretations (e.g., "Dragon", "Butterfly").
