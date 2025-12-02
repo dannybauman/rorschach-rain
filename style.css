@@ -493,6 +493,7 @@ body.theme-color .rorschach-canvas {
        but FAB is absolute so it floats over. */
 }
 /* --- Playback Bar (Desktop & Shared) --- */
+/* --- Playback Bar (Desktop & Shared) --- */
 .playback-bar {
     margin-top: auto; /* Push to bottom of flex container if parent is flex */
     padding-top: 15px;
@@ -500,6 +501,14 @@ body.theme-color .rorschach-canvas {
     background: rgba(0, 10, 0, 0.5); /* Slight background for contrast */
     padding: 15px;
     margin-bottom: 10px;
+    pointer-events: auto; /* Enable clicks */
+}
+
+/* Hide Select Button on Desktop if distracting */
+@media (min-width: 769px) {
+    .primary-action-btn {
+        display: none;
+    }
 }
 
 .scrubber-container {
