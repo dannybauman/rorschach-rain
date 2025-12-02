@@ -499,7 +499,13 @@ const RorschachDictionary = {
         { label: "TURTLE", icon: "🐢" },
         { label: "BEETLE", icon: "🪲" },
         { label: "BALLOON", icon: "🎈" },
-        { label: "PEARL", icon: "🦪" }
+        { label: "PEARL", icon: "🦪" },
+        { label: "BUBBLE", icon: "🫧" },
+        { label: "MARBLE", icon: "🔮" },
+        { label: "YOLK", icon: "🍳" },
+        { label: "DOME", icon: "🏛️" },
+        { label: "IGLOO", icon: "🛖" },
+        { label: "JELLYFISH", icon: "🪼" }
     ],
     elongated: [
         { label: "SNAKE", icon: "🐍" },
@@ -511,7 +517,13 @@ const RorschachDictionary = {
         { label: "GIRAFFE", icon: "🦒" },
         { label: "VINE", icon: "🌿" },
         { label: "COMET", icon: "☄️" },
-        { label: "TOWER", icon: "🗼" }
+        { label: "TOWER", icon: "🗼" },
+        { label: "CIGAR", icon: "🚬" },
+        { label: "FLUTE", icon: "🪈" },
+        { label: "ICICLE", icon: "🧊" },
+        { label: "NEEDLE", icon: "🪡" },
+        { label: "OBELISK", icon: "🗿" },
+        { label: "STREAM", icon: "💧" }
     ],
     spiky: [
         { label: "EXPLOSION", icon: "💥" },
@@ -523,7 +535,12 @@ const RorschachDictionary = {
         { label: "CACTUS", icon: "🌵" },
         { label: "STAR", icon: "⭐" },
         { label: "DEMON", icon: "👿" },
-        { label: "SHARD", icon: "💎" }
+        { label: "SHARD", icon: "💎" },
+        { label: "THORN", icon: "🌹" },
+        { label: "SHURIKEN", icon: "💠" },
+        { label: "URCHIN", icon: "🦔" },
+        { label: "MACE", icon: "🔨" },
+        { label: "CRACK", icon: "🏚️" }
     ],
     tiny: [
         { label: "BUG", icon: "🪲" },
@@ -532,7 +549,13 @@ const RorschachDictionary = {
         { label: "SEED", icon: "🌱" },
         { label: "ANT", icon: "🐜" },
         { label: "BERRY", icon: "🫐" },
-        { label: "ATOM", icon: "⚛️" }
+        { label: "ATOM", icon: "⚛️" },
+        { label: "SPECK", icon: "🌫️" },
+        { label: "CRUMB", icon: "🍪" },
+        { label: "PIXEL", icon: "👾" },
+        { label: "FLEA", icon: "🦗" },
+        { label: "SPARK", icon: "✨" },
+        { label: "DROPLET", icon: "💧" }
     ],
     huge: [
         { label: "WHALE", icon: "🐋" },
@@ -541,7 +564,13 @@ const RorschachDictionary = {
         { label: "FOREST", icon: "🌳" },
         { label: "CITY", icon: "🏙️" },
         { label: "ELEPHANT", icon: "🐘" },
-        { label: "GALAXY", icon: "🌌" }
+        { label: "GALAXY", icon: "🌌" },
+        { label: "LEVIATHAN", icon: "🦑" },
+        { label: "KAIJU", icon: "🦖" },
+        { label: "ASTEROID", icon: "☄️" },
+        { label: "CONTINENT", icon: "🗺️" },
+        { label: "GLACIER", icon: "❄️" },
+        { label: "MONOLITH", icon: "⬛" }
     ],
     generic: [
         { label: "RABBIT", icon: "🐰" },
@@ -551,7 +580,14 @@ const RorschachDictionary = {
         { label: "BIRD", icon: "🐦" },
         { label: "FISH", icon: "🐟" },
         { label: "BAT", icon: "🦇" },
-        { label: "MASK", icon: "🎭" }
+        { label: "MASK", icon: "🎭" },
+        { label: "INKBLOT", icon: "🎨" },
+        { label: "SHADOW", icon: "👤" },
+        { label: "STAIN", icon: "☕" },
+        { label: "SILHOUETTE", icon: "👥" },
+        { label: "PHANTOM", icon: "👻" },
+        { label: "MIRAGE", icon: "🏝️" },
+        { label: "ECHO", icon: "🔊" }
     ]
 };
 
@@ -741,6 +777,20 @@ class App {
                 this.toggleSelectionMode();
             }
         });
+
+        // Exit Analysis Button (Panel Close)
+        const exitAnalysisBtn = document.getElementById('btn-exit-analysis');
+        if (exitAnalysisBtn) {
+            exitAnalysisBtn.addEventListener('click', () => {
+                // If in selection mode, exit it (which clears selection and hides panel)
+                if (this.isSelectionMode) {
+                    this.toggleSelectionMode();
+                } else {
+                    // Just clear selection if for some reason we are not in mode but panel is open
+                    this.clearSelection();
+                }
+            });
+        }
     }
 
     selectAnalysisCard(mode) {
@@ -1165,6 +1215,16 @@ class App {
         // Show Loading State Immediately (with positioning)
         this.showLoading(center);
 
+        // Auto-Hide Menu on Mobile (UX Improvement)
+        if (window.innerWidth <= 768) {
+            const panel = document.querySelector('.controls-panel');
+            const toggleBtn = document.getElementById('btn-toggle-menu');
+            if (panel) {
+                panel.classList.add('collapsed');
+                if (toggleBtn) toggleBtn.textContent = '[ MENU ]';
+            }
+        }
+
         // Clear previous interpretation
         if (this.outlineLayer) {
             this.map.removeLayer(this.outlineLayer);
@@ -1315,9 +1375,9 @@ class App {
             const category = categories[Math.floor(Math.random() * categories.length)];
 
             const prompt = `Look at this Rorschach inkblot. The image shows WHITE shapes on a BLACK background.
-            Focus ONLY on the WHITE organic shapes. Ignore the black negative space.
+            Focus on the WHITE organic shapes. IMPORTANT: Look at the internal black negative space (holes) within the white shapes—they often form eyes, mouths, or facial features.
             It is NOT a map, island, archipelago, or cloud.
-            Use your imagination. If these WHITE shapes were a ${category}, what specific one would it be?
+            Use your imagination. If this shape (including its internal details) were a ${category}, what specific one would it be?
             Answer with just the noun (e.g. "Dragon", "Spaceship", "Pizza"). Do not add period.`;
 
             // 3. Call Gemini Vision (Identify)
