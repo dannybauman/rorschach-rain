@@ -663,3 +663,28 @@ body.theme-color .rorschach-canvas {
 .controls-panel.collapsed {
     display: none;
 }
+
+/* --- Floating Action Button (Mobile) --- */
+.floating-action-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000; /* Above map and overlay */
+    background: rgba(0, 20, 0, 0.9);
+    color: var(--phosphor-primary);
+    border: 2px solid var(--phosphor-primary);
+    padding: 15px 30px;
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    border-radius: 30px;
+    box-shadow: 0 0 20px var(--phosphor-primary);
+    cursor: pointer;
+    animation: pulse-button 2s infinite;
+    white-space: nowrap;
+}
+
+.floating-action-btn:hover {
+    background: var(--phosphor-primary);
+    color: #000;
+}

@@ -727,6 +727,20 @@ class App {
             panel.classList.toggle('collapsed');
             toggleBtn.textContent = panel.classList.contains('collapsed') ? '[ MENU ]' : '[ HIDE ]';
         });
+
+        // Lock Selection Button (Mobile)
+        document.getElementById('btn-lock-selection').addEventListener('click', () => {
+            if (this.isSelectionMode) {
+                this.toggleSelectionMode(); // Exit selection mode
+            }
+        });
+
+        // Escape Key to Cancel Selection
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isSelectionMode) {
+                this.toggleSelectionMode();
+            }
+        });
     }
 
     selectAnalysisCard(mode) {
@@ -789,12 +803,18 @@ class App {
             this.map.dragging.disable();
             container.style.cursor = 'crosshair';
 
-            // Auto-Hide Menu: Force collapse
+            // Auto-Hide Menu: Only on Mobile
             const panel = document.querySelector('.controls-panel');
             const toggleBtn = document.getElementById('btn-toggle-menu');
-            if (panel) {
-                panel.classList.add('collapsed');
-                if (toggleBtn) toggleBtn.textContent = '[ MENU ]';
+            const lockBtn = document.getElementById('btn-lock-selection');
+
+            if (window.innerWidth <= 768) {
+                if (panel) {
+                    panel.classList.add('collapsed');
+                    if (toggleBtn) toggleBtn.textContent = '[ MENU ]';
+                }
+                // Show Lock Button on Mobile
+                if (lockBtn) lockBtn.style.display = 'block';
             }
 
             // If we already have a selection, keep it, but enable editing interactions
@@ -815,6 +835,20 @@ class App {
             this.map.dragging.enable();
             container.style.cursor = 'default';
             this.hideResizeHandles();
+
+            // Restore Menu on Mobile if it was hidden
+            const panel = document.querySelector('.controls-panel');
+            const toggleBtn = document.getElementById('btn-toggle-menu');
+            const lockBtn = document.getElementById('btn-lock-selection');
+
+            if (window.innerWidth <= 768) {
+                if (panel) {
+                    panel.classList.remove('collapsed');
+                    if (toggleBtn) toggleBtn.textContent = '[ HIDE ]';
+                }
+                // Hide Lock Button
+                if (lockBtn) lockBtn.style.display = 'none';
+            }
         }
     }
 
