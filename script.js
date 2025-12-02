@@ -1003,6 +1003,29 @@ class App {
         apiKeyGroup.style.display = mode === 'cloud' ? 'block' : 'none';
     }
 
+    showLoading() {
+        const overlay = document.getElementById('result-overlay');
+        const content = overlay.querySelector('.result-content');
+        const iconEl = overlay.querySelector('.result-icon');
+        const textEl = overlay.querySelector('.result-text');
+        const closeBtn = overlay.querySelector('.close-result');
+
+        // Reset content for loading state
+        iconEl.innerHTML = '⚙️'; // Gear or Radar icon
+        iconEl.className = 'result-icon spin'; // Add spin class
+        textEl.textContent = 'ANALYZING PATTERN...';
+
+        overlay.style.display = 'flex';
+
+        // Temporary close handler in case it gets stuck
+        const closeHandler = () => {
+            overlay.style.display = 'none';
+            iconEl.classList.remove('spin');
+            closeBtn.removeEventListener('click', closeHandler);
+        };
+        closeBtn.addEventListener('click', closeHandler);
+    }
+
     identifyObject() {
         if (this.rorschachLayer.mode === 'radar') {
             // Auto-switch to Ink Blot mode
@@ -1011,6 +1034,9 @@ class App {
             // Actually, clicking the button handles setMode AND UI active state.
             // But we are inside the class. Let's just call the button click to be safe and simple.
         }
+
+        // Show Loading State Immediately
+        this.showLoading();
 
         // Clear previous interpretation
         if (this.outlineLayer) {
@@ -1029,11 +1055,14 @@ class App {
         // Clear canvas outlines
         this.rorschachLayer.setOutlines(null);
 
-        if (this.analysisMode === 'cloud') {
-            this.analyzeWithGemini();
-        } else {
-            this.analyzeLocal();
-        }
+        // Small delay to let the UI update before heavy processing
+        setTimeout(() => {
+            if (this.analysisMode === 'cloud') {
+                this.analyzeWithGemini();
+            } else {
+                this.analyzeLocal();
+            }
+        }, 100);
     }
 
     analyzeLocal() {
