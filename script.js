@@ -199,6 +199,12 @@ L.RorschachLayer = L.Layer.extend({
     _render: function() {
         if (!this.map || !this.frame) return;
 
+        // Counter-translate canvases to keep them fixed to the viewport
+        // Since they are inside moving panes, we must negate the pane's transform
+        const panePos = this.map._getMapPanePos();
+        L.DomUtil.setPosition(this.canvas, { x: -panePos.x, y: -panePos.y });
+        L.DomUtil.setPosition(this.outlineCanvas, { x: -panePos.x, y: -panePos.y });
+
         const ctx = this.canvas.getContext('2d');
         const outCtx = this.outlineCanvas.getContext('2d');
         const width = this.canvas.width;
