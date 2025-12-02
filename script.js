@@ -1433,33 +1433,9 @@ class App {
             const identifiedNoun = visionData.candidates[0].content.parts[0].text.trim().toUpperCase();
             console.log("Gemini Identified:", identifiedNoun);
 
-            this.updateStatus(`GENERATING IMAGE...`, true);
-
-            // 4. Attempt Real Image Generation (Imagen)
-            let generatedImage = null;
-
-            try {
-                // Simulate network delay for "Generation"
-                // In a real app, we'd hit the Imagen endpoint here.
-                await new Promise(r => setTimeout(r, 1500));
-
-                // Asset matching fallback
-                if (identifiedNoun.includes("RABBIT") || identifiedNoun.includes("BUNNY")) {
-                    generatedImage = "assets/sketch_rabbit.png";
-                } else if (identifiedNoun.includes("SKULL") || identifiedNoun.includes("HEAD")) {
-                    generatedImage = "assets/sketch_skull.png";
-                } else if (identifiedNoun.includes("BUTTERFLY") || identifiedNoun.includes("MOTH")) {
-                    generatedImage = "assets/sketch_butterfly.png";
-                }
-
-            } catch (genError) {
-                console.warn("Image Generation Failed:", genError);
-            }
-
             const result = {
                 label: identifiedNoun,
-                icon: "✨",
-                img: generatedImage // Can be null
+                icon: "✨"
             };
 
             // Use the (potentially filtered) blob
@@ -1501,20 +1477,7 @@ class App {
         const center = blob.center;
 
         // 2. Show Image Overlay ONLY if we have a valid image
-        if (result.img) {
-            const latOffset = 2.0;
-            const lngOffset = 3.0;
-
-            const bounds = [
-                [center.lat - latOffset, center.lng - lngOffset],
-                [center.lat + latOffset, center.lng + lngOffset]
-            ];
-
-            this.sketchLayer = L.imageOverlay(result.img, bounds, {
-                opacity: 0.9,
-                className: 'sketch-overlay'
-            }).addTo(this.map);
-        }
+        // (Removed broken image logic)
 
     // 3. (Removed) Map Marker
     /*
@@ -1559,23 +1522,18 @@ class App {
     // Close Handler
     const closeHandler = () => {
         overlay.style.display = 'none';
-        if (this.sketchLayer) this.map.removeLayer(this.sketchLayer);
         if (this.labelMarker) this.map.removeLayer(this.labelMarker);
 
         // Clear outlines
         this.rorschachLayer.setOutlines(null);
 
-        this.sketchLayer = null;
         this.labelMarker = null;
         this.outlineLayer = null;
         closeBtn.removeEventListener('click', closeHandler);
     };
     closeBtn.addEventListener('click', closeHandler);
 
-    // Remove after a while
-    setTimeout(() => {
-        if (overlay.style.display !== 'none') closeHandler();
-    }, 15000); // Longer timeout for Cloud Vision
+    // Auto-close removed to keep result visible until user action
 }
     showInterpretation(blob, result) {
         // 1. Draw Red Outline (Polyline)
