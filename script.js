@@ -460,6 +460,132 @@ L.RorschachLayer = L.Layer.extend({
 });
 
 /**
+ * Shape Analysis & Heuristics
+ * Analyzes geometric properties of a blob to determine what it "looks like".
+ */
+const RorschachDictionary = {
+    // Categories based on shape traits
+    round: [
+        { label: "MOON", icon: "🌑" },
+        { label: "COIN", icon: "🪙" },
+        { label: "SHIELD", icon: "🛡️" },
+        { label: "FACE", icon: "🙂" },
+        { label: "PLANET", icon: "🪐" },
+        { label: "EGG", icon: "🥚" },
+        { label: "TURTLE", icon: "🐢" },
+        { label: "BEETLE", icon: "🪲" }
+    ],
+    elongated: [
+        { label: "SNAKE", icon: "🐍" },
+        { label: "RIVER", icon: "🌊" },
+        { label: "WORM", icon: "🪱" },
+        { label: "SWORD", icon: "⚔️" },
+        { label: "LIGHTNING", icon: "⚡" },
+        { label: "DNA", icon: "🧬" },
+        { label: "GIRAFFE", icon: "🦒" },
+        { label: "VINE", icon: "🌿" }
+    ],
+    spiky: [
+        { label: "EXPLOSION", icon: "💥" },
+        { label: "MONSTER", icon: "👹" },
+        { label: "SPLASH", icon: "💦" },
+        { label: "TREE", icon: "🌲" },
+        { label: "DRAGON", icon: "🐉" },
+        { label: "CROWN", icon: "👑" },
+        { label: "CACTUS", icon: "🌵" },
+        { label: "STAR", icon: "⭐" }
+    ],
+    tiny: [
+        { label: "BUG", icon: "🪲" },
+        { label: "DOT", icon: "⚫" },
+        { label: "PEBBLE", icon: "🪨" },
+        { label: "SEED", icon: "🌱" },
+        { label: "ANT", icon: "🐜" },
+        { label: "BERRY", icon: "🫐" }
+    ],
+    huge: [
+        { label: "WHALE", icon: "🐋" },
+        { label: "MOUNTAIN", icon: "⛰️" },
+        { label: "TITAN", icon: "🗿" },
+        { label: "FOREST", icon: "🌳" },
+        { label: "CITY", icon: "🏙️" },
+        { label: "ELEPHANT", icon: "🐘" }
+    ],
+    generic: [
+        { label: "RABBIT", icon: "🐰" },
+        { label: "BUTTERFLY", icon: "🦋" },
+        { label: "GHOST", icon: "👻" },
+        { label: "SKULL", icon: "💀" },
+        { label: "BIRD", icon: "🐦" },
+        { label: "FISH", icon: "🐟" }
+    ]
+};
+
+class ShapeAnalyzer {
+    static analyze(blob, width, height) {
+        if (!blob || !blob.segments || blob.segments.length === 0) return null;
+
+        // 1. Calculate Metrics
+        // We need to approximate Area and Perimeter from segments or bounds
+        // Since we don't have the raw pixel mask easily accessible here (it's in getOutlines but not returned),
+        // we will use the Bounding Box of the segments as a proxy for now.
+        // Ideally, getOutlines should return these metrics.
+
+        // Let's calculate bounds of the segments
+        let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+
+        blob.segments.forEach(seg => {
+            // seg is [LatLng, LatLng]
+            seg.forEach(pt => {
+                minLat = Math.min(minLat, pt.lat);
+                maxLat = Math.max(maxLat, pt.lat);
+                minLng = Math.min(minLng, pt.lng);
+                maxLng = Math.max(maxLng, pt.lng);
+            });
+        });
+
+        const latSpan = maxLat - minLat;
+        const lngSpan = maxLng - minLng;
+
+        // Rough Aspect Ratio (Elongation)
+        const aspectRatio = Math.max(latSpan, lngSpan) / Math.min(latSpan, lngSpan);
+
+        // Rough Size (Area proxy relative to map view? Hard to say without context)
+        // Let's use the span magnitude.
+        const magnitude = Math.sqrt(latSpan*latSpan + lngSpan*lngSpan);
+
+        // Complexity/Spikiness is hard without pixel data or vertex count/area ratio.
+        // Proxy: Segment count vs Bounding Box size.
+        // A simple shape has few segments relative to size? No, marching squares always has many short segments.
+        // Let's use Aspect Ratio and Size for now.
+
+        let category = 'generic';
+
+        if (magnitude < 0.05) {
+            category = 'tiny';
+        } else if (magnitude > 5.0) {
+            category = 'huge';
+        } else if (aspectRatio > 2.5) {
+            category = 'elongated';
+        } else {
+            // Randomly decide between Round and Spiky for now since we lack Compactness
+            // In a real implementation, we'd calculate (4*PI*Area)/(Perimeter^2)
+            category = Math.random() > 0.5 ? 'round' : 'spiky';
+        }
+
+        // Select random item from category
+        const options = RorschachDictionary[category];
+        const result = options[Math.floor(Math.random() * options.length)];
+
+        return {
+            ...result,
+            metrics: { magnitude, aspectRatio, category }
+        };
+    }
+}
+
+
+/**
  * Main Application Controller
  */
 class App {
@@ -504,9 +630,9 @@ class App {
         document.getElementById('btn-inkblot').addEventListener('click', () => this.setMode('inkblot'));
         document.getElementById('btn-both').addEventListener('click', () => this.setMode('both'));
 
-        // Analysis Mode Toggle
-        document.getElementById('btn-mode-local').addEventListener('click', () => this.setAnalysisMode('local'));
-        document.getElementById('btn-mode-cloud').addEventListener('click', () => this.setAnalysisMode('cloud'));
+        // Analysis Mode Toggle (Old buttons removed, logic moved to cards)
+        // document.getElementById('btn-mode-local').addEventListener('click', () => this.setAnalysisMode('local'));
+        // document.getElementById('btn-mode-cloud').addEventListener('click', () => this.setAnalysisMode('cloud'));
 
         document.getElementById('color-scheme').addEventListener('change', (e) => this.setTheme(e.target.value));
         document.getElementById('crt-intensity').addEventListener('input', (e) => {
@@ -521,12 +647,35 @@ class App {
 
         document.getElementById('btn-play').addEventListener('click', () => this.toggleAnimation());
 
-        // New Identify Button
-        document.getElementById('btn-identify').addEventListener('click', () => this.identifyObject());
+        // New Identify Button (Initiate Scan)
+        document.getElementById('btn-initiate').addEventListener('click', () => this.identifyObject());
 
         // Selection Tool
         document.getElementById('btn-select').addEventListener('click', () => this.toggleSelectionMode());
         this.initSelectionTool();
+
+        // New Analysis Cards
+        document.getElementById('card-local').addEventListener('click', () => this.selectAnalysisCard('local'));
+        document.getElementById('card-cloud').addEventListener('click', () => this.selectAnalysisCard('cloud'));
+    }
+
+    selectAnalysisCard(mode) {
+        this.analysisMode = mode;
+
+        // UI Updates
+        document.querySelectorAll('.data-card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`card-${mode}`).classList.add('active');
+
+        // Show/Hide API Input
+        const apiContainer = document.getElementById('api-key-container');
+        if (mode === 'cloud') {
+            apiContainer.style.display = 'block';
+        } else {
+            apiContainer.style.display = 'none';
+        }
+
+        // Enable Initiate Button
+        document.getElementById('btn-initiate').disabled = false;
     }
 
     initSelectionTool() {
@@ -554,6 +703,13 @@ class App {
 
         if (this.isSelectionMode) {
             btn.classList.add('active');
+            // Update text if re-selecting
+            if (this.selectionLayer) {
+                btn.textContent = 'RE-SELECT AREA';
+            } else {
+                btn.textContent = 'CANCEL SELECTION';
+            }
+
             this.map.dragging.disable();
             container.style.cursor = 'crosshair';
 
@@ -564,6 +720,14 @@ class App {
 
         } else {
             btn.classList.remove('active');
+
+            // Restore text based on state
+            if (this.selectionLayer) {
+                btn.textContent = 'RE-SELECT AREA';
+            } else {
+                btn.textContent = 'SELECT TARGET AREA';
+            }
+
             this.map.dragging.enable();
             container.style.cursor = 'default';
             this.hideResizeHandles();
@@ -639,6 +803,10 @@ class App {
             this.selectionBoundsLatLng = this.selectionLayer.getBounds();
             this.showResizeHandles();
 
+            // Show Analysis Panel
+            document.getElementById('analysis-panel').style.display = 'block';
+            document.getElementById('btn-select').textContent = 'RE-SELECT AREA';
+
             // Auto-exit selection mode? User might want to tweak. Let's stay in mode.
         }
 
@@ -662,6 +830,16 @@ class App {
         this.hideResizeHandles();
         this.selectionBoundsLatLng = null;
         this.selectionBounds = null; // Clear old pixel bounds
+
+        // Reset UI
+        document.getElementById('analysis-panel').style.display = 'none';
+        document.getElementById('btn-select').textContent = 'SELECT TARGET AREA';
+
+        // Reset Analysis State
+        this.analysisMode = null;
+        document.querySelectorAll('.data-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('btn-initiate').disabled = true;
+        document.getElementById('api-key-container').style.display = 'none';
     }
 
     // --- Resize Handles ---
@@ -826,20 +1004,18 @@ class App {
 
         // 2. Mock AI Delay
         setTimeout(() => {
-            // 3. Select Random Interpretation
-            const interpretations = [
-                { label: "RABBIT", icon: "🐰" },
-                { label: "BUTTERFLY", icon: "🦋" },
-                { label: "GHOST", icon: "👻" },
-                { label: "SKULL", icon: "💀" },
-                { label: "CLOUD", icon: "☁️" }
-            ];
-            const result = interpretations[Math.floor(Math.random() * interpretations.length)];
+            // 3. Analyze Shape using Heuristics
+            let result = ShapeAnalyzer.analyze(blob, this.rorschachLayer.canvas.width, this.rorschachLayer.canvas.height);
+
+            if (!result) {
+                // Fallback if analysis fails
+                result = { label: "UNKNOWN", icon: "❓" };
+            }
 
             // 4. Show Overlay (Leaflet Layers)
             this.showInterpretation(blob, result);
             this.updateStatus('ANALYSIS COMPLETE', false);
-        }, 1500);
+        }, 800); // Faster than 1500ms since it's local
     }
 
     // Helper not needed anymore if we clip in getOutlines

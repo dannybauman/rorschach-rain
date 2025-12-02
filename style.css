@@ -401,3 +401,107 @@ body.theme-color .rorschach-canvas {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* Analysis Panel */
+.analysis-panel {
+    margin-top: 15px;
+    border-top: 1px solid var(--phosphor-secondary);
+    padding-top: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-header {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--phosphor-primary);
+    text-shadow: 0 0 5px var(--phosphor-primary);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.cards-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.data-card {
+    flex: 1;
+    border: 1px solid var(--phosphor-dim);
+    background: rgba(0, 20, 0, 0.5);
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.data-card:hover {
+    border-color: var(--phosphor-secondary);
+    background: rgba(0, 40, 0, 0.6);
+}
+
+.data-card.active {
+    border-color: var(--phosphor-primary);
+    background: var(--phosphor-dim);
+    box-shadow: 0 0 10px var(--phosphor-secondary);
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--phosphor-primary);
+}
+
+.card-subtitle {
+    font-size: 0.7rem;
+    color: var(--phosphor-secondary);
+    margin-top: 2px;
+}
+
+.large-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    margin-top: 10px;
+    border: 2px solid var(--phosphor-primary);
+    background: rgba(0, 255, 65, 0.1);
+    transition: all 0.3s;
+}
+
+.large-button:not(:disabled) {
+    animation: pulse-button 2s infinite;
+}
+
+.large-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--phosphor-dim);
+    background: transparent;
+    animation: none;
+}
+
+.large-button:hover:not(:disabled) {
+    background: var(--phosphor-primary);
+    color: #000;
+    box-shadow: 0 0 20px var(--phosphor-primary);
+}
+
+@keyframes pulse-button {
+    0% { box-shadow: 0 0 5px var(--phosphor-dim); }
+    50% { box-shadow: 0 0 15px var(--phosphor-secondary); }
+    100% { box-shadow: 0 0 5px var(--phosphor-dim); }
+}

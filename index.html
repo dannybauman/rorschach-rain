@@ -58,6 +58,8 @@
                         </select>
                     </div>
 
+                    <!-- Old Analysis Controls Removed -->
+                    <!--
                     <div class="control-group">
                         <label>ANALYSIS MODE</label>
                         <div class="toggle-group">
@@ -68,13 +70,41 @@
 
                     <div class="control-group" id="api-key-group" style="display:none;">
                         <label>GEMINI API KEY</label>
-                        <input type="password" id="api-key-input" placeholder="PASTE KEY HERE" class="crt-input">
+                        <input type="password" id="api-key-input-old" placeholder="PASTE KEY HERE" class="crt-input">
                     </div>
+                    -->
 
                     <div class="control-group">
-                        <button id="btn-select" class="crt-button">SELECT AREA</button>
-                        <button id="btn-identify" class="crt-button">WHAT DO YOU SEE?</button>
+                        <button id="btn-select" class="crt-button">SELECT TARGET AREA</button>
                     </div>
+
+                    <!-- New Analysis Panel (Initially Hidden) -->
+                    <div id="analysis-panel" class="analysis-panel" style="display: none;">
+                        <div class="panel-header">ANALYSIS_MATRIX</div>
+
+                        <div class="cards-container">
+                            <div class="data-card" id="card-local">
+                                <div class="card-icon">⚡</div>
+                                <div class="card-title">LOCAL_SCAN</div>
+                                <div class="card-subtitle">FAST / HEURISTIC</div>
+                            </div>
+
+                            <div class="data-card" id="card-cloud">
+                                <div class="card-icon">🧠</div>
+                                <div class="card-title">CLOUD_VISION</div>
+                                <div class="card-subtitle">DEEP / GEMINI</div>
+                            </div>
+                        </div>
+
+                        <div id="api-key-container" style="display: none; margin-top: 10px;">
+                            <input type="password" id="api-key-input" placeholder="ENTER GEMINI KEY" class="crt-input">
+                        </div>
+
+                        <button id="btn-initiate" class="crt-button large-button" disabled>WHAT DO YOU SEE?</button>
+                    </div>
+
+                    <!-- Old Identify Button (Removed/Replaced by above) -->
+                    <!-- <button id="btn-identify" class="crt-button">WHAT DO YOU SEE?</button> -->
 
                     <div class="control-group">
                         <label>TIME_SCRUBBER</label>

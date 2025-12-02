@@ -9,7 +9,9 @@ The project features a "Cloud Analysis" mode powered by Google's Gemini Vision A
 ## Features
 - **Real-time Radar**: Fetches live precipitation data via RainViewer API.
 - **Ink Blot Mode**: Mirrors and filters radar data to create Rorschach patterns.
-- **Cloud Analysis**: Uses Gemini Flash to "see" shapes in the storm cells.
+- **Analysis Matrix**:
+    - **Local Scan**: Instant, offline shape analysis using geometric heuristics (sees "Moons", "Dragons", "Whales").
+    - **Cloud Vision**: Deep analysis using Google's Gemini Vision API for detailed interpretations.
 - **Interactive Tools**: Geo-referenced selection tool, panning, and zooming.
 
 ## Development Setup
